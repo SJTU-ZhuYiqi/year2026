@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026年进度</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --gold: #f5c842;
+      --gold-light: #ffe680;
+      --sand: #c8a96e;
+      --bg-top: #0a0a1a;
+      --bg-mid: #0f1535;
+      --bg-bot: #0a0a1a;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bot) 100%);
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #e8e8ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Star field */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle var(--dur, 3s) infinite var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(1); }
+      50% { opacity: var(--bright, 0.8); transform: scale(1.5); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      width: min(720px, 96vw);
+    }
+
+    /* Title */
+    .title {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      background: linear-gradient(135deg, #fff 0%, var(--gold-light) 40%, var(--gold) 70%, var(--sand) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      margin-bottom: 0.4rem;
+      filter: drop-shadow(0 0 18px rgba(245,200,66,0.4));
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: rgba(200, 200, 255, 0.5);
+      letter-spacing: 0.2em;
+      margin-bottom: 2.4rem;
+      text-transform: uppercase;
+    }
+
+    /* Clock card */
+    .clock-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.4rem 2rem;
+      margin-bottom: 2.4rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .clock-date {
+      font-size: 0.85rem;
+      color: rgba(200,200,255,0.55);
+      letter-spacing: 0.15em;
+      margin-bottom: 0.3rem;
+    }
+
+    .clock-time {
+      font-size: clamp(2.4rem, 7vw, 4rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #fff 0%, #c0d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    /* Hourglass + percent */
+    .percent-section {
+      margin-bottom: 2.4rem;
+    }
+
+    .hourglass-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    /* SVG Hourglass */
+    .hourglass-svg {
+      width: 60px;
+      height: 80px;
+      filter: drop-shadow(0 0 10px rgba(245,200,66,0.5));
+      flex-shrink: 0;
+    }
+
+    .percent-number {
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, #ffffff 0%, var(--gold-light) 35%, var(--gold) 65%, #e09a10 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(245,200,66,0.5));
+      letter-spacing: -0.01em;
+    }
+
+    .percent-label {
+      font-size: 0.9rem;
+      color: rgba(200,200,255,0.55);
+      letter-spacing: 0.12em;
+      margin-top: 0.5rem;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.8rem 2rem 2rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+      margin-bottom: 2rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.82rem;
+      color: rgba(200,200,255,0.45);
+      letter-spacing: 0.1em;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 18px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 9px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e09a10 0%, var(--gold) 40%, var(--gold-light) 80%, #fff9d0 100%);
+      border-radius: 9px;
+      transition: width 0.8s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(245,200,66,0.6), 0 0 24px rgba(245,200,66,0.3);
+    }
+
+    /* Shimmer animation on bar */
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      animation: shimmer 2.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { left: -60%; }
+      100% { left: 130%; }
+    }
+
+    /* Days info row */
+    .days-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .day-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1rem 0.6rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .day-card .num {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, #fff 0%, var(--gold-light) 60%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+
+    .day-card .lbl {
+      font-size: 0.72rem;
+      color: rgba(200,200,255,0.45);
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: rgba(200,200,255,0.2);
+      letter-spacing: 0.15em;
+    }
+
+    /* Pulse dot */
+    .pulse-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #6bff9e;
+      border-radius: 50%;
+      margin-right: 0.4em;
+      vertical-align: middle;
+      animation: pulse-anim 1.5s infinite;
+      box-shadow: 0 0 6px #6bff9e;
+    }
+    @keyframes pulse-anim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.6); }
+    }
+
+
+  </style>
+</head>
+<body>
+
+<!-- Star field -->
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <div class="title">2026 年进度</div>
+  <div class="subtitle">How far have we come this year?</div>
+
+  <!-- Clock -->
+  <div class="clock-card">
+    <div class="clock-date" id="date-str">–</div>
+    <div class="clock-time" id="time-str">--:--:--</div>
+  </div>
+
+  <!-- Hourglass + percent -->
+  <div class="percent-section">
+    <div class="hourglass-wrap">
+      <!-- Animated SVG Hourglass -->
+      <svg class="hourglass-svg" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffe680"/>
+            <stop offset="100%" stop-color="#c8a96e"/>
+          </linearGradient>
+          <clipPath id="upper-clip">
+            <rect x="10" y="4" width="40" height="34"/>
+          </clipPath>
+          <clipPath id="lower-clip">
+            <rect x="10" y="42" width="40" height="34"/>
+          </clipPath>
+        </defs>
+        <!-- Frame -->
+        <path d="M8 2 L52 2 L52 6 L32 38 L52 74 L52 78 L8 78 L8 74 L28 38 L8 6 Z"
+              stroke="url(#hg)" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <!-- Top bar -->
+        <rect x="6" y="1" width="48" height="5" rx="2.5" fill="url(#hg)"/>
+        <!-- Bottom bar -->
+        <rect x="6" y="74" width="48" height="5" rx="2.5" fill="url(#hg)"/>
+        <!-- Upper sand (empties over the year) -->
+        <g clip-path="url(#upper-clip)">
+          <polygon id="upper-sand"
+            points="10,38 50,38 50,6 10,6"
+            fill="rgba(245,200,66,0.25)"/>
+        </g>
+        <!-- Lower sand (fills over the year) -->
+        <g clip-path="url(#lower-clip)">
+          <polygon id="lower-sand"
+            points="28,42 32,42 50,76 10,76"
+            fill="rgba(245,200,66,0.6)"/>
+        </g>
+        <!-- Sand stream -->
+        <line x1="30" y1="38" x2="30" y2="42" stroke="url(#hg)" stroke-width="1.5" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+
+      <div>
+        <div class="percent-number" id="percent-num">—</div>
+      </div>
+
+      <!-- Mirror hourglass (right side, flipped) -->
+      <svg class="hourglass-svg" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1);">
+        <defs>
+          <linearGradient id="hg2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffe680"/>
+            <stop offset="100%" stop-color="#c8a96e"/>
+          </linearGradient>
+          <clipPath id="upper-clip2">
+            <rect x="10" y="4" width="40" height="34"/>
+          </clipPath>
+          <clipPath id="lower-clip2">
+            <rect x="10" y="42" width="40" height="34"/>
+          </clipPath>
+        </defs>
+        <path d="M8 2 L52 2 L52 6 L32 38 L52 74 L52 78 L8 78 L8 74 L28 38 L8 6 Z"
+              stroke="url(#hg2)" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <rect x="6" y="1" width="48" height="5" rx="2.5" fill="url(#hg2)"/>
+        <rect x="6" y="74" width="48" height="5" rx="2.5" fill="url(#hg2)"/>
+        <g clip-path="url(#upper-clip2)">
+          <polygon id="upper-sand2"
+            points="10,38 50,38 50,6 10,6"
+            fill="rgba(245,200,66,0.25)"/>
+        </g>
+        <g clip-path="url(#lower-clip2)">
+          <polygon id="lower-sand2"
+            points="28,42 32,42 50,76 10,76"
+            fill="rgba(245,200,66,0.6)"/>
+        </g>
+        <line x1="30" y1="38" x2="30" y2="42" stroke="url(#hg2)" stroke-width="1.5" opacity="0.9">
+          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="1s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+    </div>
+
+    <div class="percent-label"><span class="pulse-dot"></span>2026 年已过去 <span id="percent-inline">–</span></div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span>2026-01-01 00:00:00</span>
+      <span>2026-12-31 23:59:59</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Day cards -->
+  <div class="days-row">
+    <div class="day-card">
+      <div class="num" id="days-passed">–</div>
+      <div class="lbl">已过天数</div>
+    </div>
+    <div class="day-card">
+      <div class="num" id="days-left">–</div>
+      <div class="lbl">剩余天数</div>
+    </div>
+    <div class="day-card">
+      <div class="num">365</div>
+      <div class="lbl">全年天数</div>
+    </div>
+  </div>
+
+  <div class="footer">实时更新 · 每秒刷新</div>
+</div>
+
+<script>
+  // ==============================
+  // Star field
+  // ==============================
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${(Math.random()*4+2).toFixed(1)}s;
+      --delay:${(Math.random()*5).toFixed(1)}s;
+      --bright:${(Math.random()*0.6+0.3).toFixed(2)};
+      width:${Math.random()<0.2?3:2}px;
+      height:${Math.random()<0.2?3:2}px;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // ==============================
+  // Time helpers
+  // ==============================
+  function pad(n, len=2) { return String(n).padStart(len, '0'); }
+
+  const WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+  const MONTHS   = ['一月','二月','三月','四月','五月','六月',
+                    '七月','八月','九月','十月','十一月','十二月'];
+
+  function get2026Percent(now) {
+    const start = new Date(2026, 0, 1, 0, 0, 0, 0).getTime();
+    const end   = new Date(2026, 11, 31, 23, 59, 59, 999).getTime();
+    const t     = now.getTime();
+    if (t < start) return 0;
+    if (t > end)   return 100;
+    return (t - start) / (end - start) * 100;
+  }
+
+  function getDaysPassed(now) {
+    const start = new Date(2026, 0, 1, 0, 0, 0, 0);
+    const diffMs = now - start;
+    return Math.max(0, diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  // ==============================
+  // Hourglass sand update
+  // ==============================
+  function updateHourglass(pct) {
+    const upperTop = 6 + (38 - 6) * (pct / 100);
+    const upperPts = `10,${upperTop} 50,${upperTop} 50,38 10,38`;
+    document.getElementById('upper-sand').setAttribute('points', upperPts);
+    document.getElementById('upper-sand2').setAttribute('points', upperPts);
+
+    const lowerTop = 76 - (76 - 42) * (pct / 100);
+    const frac = (76 - lowerTop) / 34;
+    const lx = 28 - 18 * frac;
+    const rx = 32 + 18 * frac;
+    const lowerPts = `${lx},${lowerTop} ${rx},${lowerTop} 50,76 10,76`;
+    document.getElementById('lower-sand').setAttribute('points', lowerPts);
+    document.getElementById('lower-sand2').setAttribute('points', lowerPts);
+  }
+
+  // ==============================
+  // Clock tick
+  // ==============================
+  function tick() {
+    const now = new Date();
+
+    document.getElementById('time-str').textContent =
+      `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    document.getElementById('date-str').textContent =
+      `${now.getFullYear()} 年 ${MONTHS[now.getMonth()]}  ${now.getDate()} 日  ${WEEKDAYS[now.getDay()]}`;
+
+    // 6 decimal places
+    const pct = get2026Percent(now);
+    const pctStr = pct.toFixed(6) + '%';
+    document.getElementById('percent-num').textContent = pct.toFixed(6) + '%';
+    document.getElementById('percent-inline').textContent = pctStr;
+
+    document.getElementById('progress-fill').style.width = pct.toFixed(6) + '%';
+
+    const daysPassed = getDaysPassed(now);
+    const daysPassedInt = Math.floor(daysPassed);
+    document.getElementById('days-passed').textContent = daysPassedInt;
+    document.getElementById('days-left').textContent = Math.max(0, 365 - daysPassedInt);
+
+    updateHourglass(pct);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+
+</script>
+</body>
+</html>
